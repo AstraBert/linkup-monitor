@@ -1,0 +1,58 @@
+[build-system]
+requires = ["setuptools>=61.0"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "linkup-monitor"
+version = "0.0.0"
+authors = [
+    { name="Clelia (Astra) Bertelli", email="astraberte9@gmail.com" },
+]
+description = "linkup-monitor: a monitoring solution for world's best search for AI app"
+readme = "README.md"
+requires-python = ">=3.10"
+classifiers = [
+    "Programming Language :: Python :: 3",
+    "License :: OSI Approved :: MIT License",
+    "Operating System :: OS Independent",
+]
+dependencies = [
+    'pydantic',
+    'pgsql',
+    'pandas',
+    'linkup-sdk',
+]
+
+[project.urls]
+Homepage = "https://github.com/AstraBert/linkup-monitor"
+Issues = "https://github.com/AstraBert/linkup-monitor/issues"
+
+[tool.setuptools.packages.find]
+where = ["src"]
+include = ["linkup_monitor*"]
+
+[options.package_data]
+linkup_monitor = ["*"]
+
+[tool.hatch.build.targets.wheel]
+only-include = ["src/linkup_monitor"]
+
+[tool.hatch.build.targets.wheel.sources]
+"src" = ""
+
+[tool.hatch.envs.default]
+dependencies = [
+    "pytest",
+    "pytest-ordering",
+    "pytest-asyncio",
+]
+
+[tool.hatch.envs.default.scripts]
+test = "cp src/linkup_monitor/*.py tests/ && pytest tests/test_*.py -p no:warnings"
+
+[tool.hatch.envs.default.py-version]
+38 = "3.8"
+39 = "3.9"
+40 = "3.10"
+41 = "3.11"
+42 = "3.12"

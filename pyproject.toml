@@ -10,7 +10,7 @@ authors = [
 ]
 description = "linkup-monitor: a monitoring solution for world's best search for AI apps"
 readme = "README.md"
-requires-python = ">=3.10"
+requires-python = ">=3.11"
 classifiers = [
     "Programming Language :: Python :: 3",
     "License :: OSI Approved :: MIT License",
@@ -52,8 +52,6 @@ dependencies = [
 test = "cp src/linkup_monitor/add_types.py tests/ && cp src/linkup_monitor/monitor.py tests/ && cp src/linkup_monitor/postgres_client.py tests/ && pytest tests/test_*.py -p no:warnings && rm tests/add_types.py && rm tests/monitor.py && rm tests/postgres_client.py"
 
 [tool.hatch.envs.default.py-version]
-38 = "3.8"
-39 = "3.9"
-40 = "3.10"
 41 = "3.11"
 42 = "3.12"
+43 = "3.13"

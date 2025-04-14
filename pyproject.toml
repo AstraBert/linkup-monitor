@@ -8,7 +8,7 @@ version = "0.0.0"
 authors = [
     { name="Clelia (Astra) Bertelli", email="astraberte9@gmail.com" },
 ]
-description = "linkup-monitor: a monitoring solution for world's best search for AI app"
+description = "linkup-monitor: a monitoring solution for world's best search for AI apps"
 readme = "README.md"
 requires-python = ">=3.10"
 classifiers = [
@@ -42,13 +42,14 @@ only-include = ["src/linkup_monitor"]
 
 [tool.hatch.envs.default]
 dependencies = [
+    "python-dotenv",
     "pytest",
     "pytest-ordering",
     "pytest-asyncio",
 ]
 
 [tool.hatch.envs.default.scripts]
-test = "cp src/linkup_monitor/*.py tests/ && pytest tests/test_*.py -p no:warnings"
+test = "cp src/linkup_monitor/add_types.py tests/ && cp src/linkup_monitor/monitor.py tests/ && cp src/linkup_monitor/postgres_client.py tests/ && pytest tests/test_*.py -p no:warnings && rm tests/add_types.py && rm tests/monitor.py && rm tests/postgres_client.py"
 
 [tool.hatch.envs.default.py-version]
 38 = "3.8"

@@ -21,10 +21,10 @@ def test_input_db_data():
 
 def test_select_db_data():
     test_inputs = [
-        {"created_at": False, "status_code": None, "output_type": "searchResults", "search_type": None, "limit": 1},
-        {"created_at": None, "status_code": None, "output_type": None, "search_type": None, "limit": None},
-        {"created_at": False, "status_code": 200, "output_type": "searchResult", "search_type": None, "limit": None},
-        {"created_at": False, "status_code": None, "output_type": "searchResults", "search_type": "standar", "limit": 1},
+        {"created_at": False, "status_code": None, "output_type": "searchResults", "search_type": None, "limit": 1, "query": None},
+        {"created_at": None, "status_code": None, "output_type": None, "search_type": None, "limit": None, "query": None},
+        {"created_at": False, "status_code": 200, "output_type": "searchResult", "search_type": None, "limit": None, "query": None},
+        {"created_at": False, "status_code": None, "output_type": "searchResults", "search_type": "standar", "limit": 1, "query": None},
     ]
     expected_outputs = [1,1,0,0]
     outputs = []

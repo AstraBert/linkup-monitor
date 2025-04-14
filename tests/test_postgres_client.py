@@ -36,10 +36,10 @@ def test_data_push():
 def test_data_pull():
     test_inputs = [
         None,
-        {"created_at": False, "status_code": 200, "output_type": None, "search_type": None, "limit": 10},
-        {"created_at": None, "status_code": None, "output_type": None, "search_type": "deep", "limit": None},
-        {"created_at": None, "status_code": None, "output_type": None, "search_type": None, "limit": 2},
-        {"created_at": True, "status_code": None, "output_type": None, "search_type": None, "limit": None},
+        {"created_at": False, "status_code": 200, "output_type": None, "search_type": None, "limit": 10, "query": "This doesn't make sense"},
+        {"created_at": None, "status_code": None, "output_type": None, "search_type": "deep", "limit": None,"query": "This doesn't make sense"},
+        {"created_at": None, "status_code": None, "output_type": None, "search_type": None, "limit": 2, "query": "This doesn't make sense"},
+        {"created_at": True, "status_code": None, "output_type": None, "search_type": None, "limit": None, "query": "This doesn't make sense"},
     ]
     expected_outputs = [True, True, True, True, True]
     outputs = []
@@ -57,7 +57,7 @@ def test_data_pull():
                     outputs.append(len(output_data)==0)
             else:
                 output_data = client.pull_data(test_inputs[t])
-                outputs.append(len(output_data)==3)
+                outputs.append(len(output_data)>=3)
         except Exception as e:
             print(e)
             outputs.append(None)

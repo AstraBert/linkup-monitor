@@ -1,5 +1,5 @@
 from pydantic import BaseModel, model_validator
-from typing_extensions import Self, Optional
+from typing_extensions import Self, Optional, Literal
 import json
 from json import JSONDecodeError
 import warnings
@@ -36,15 +36,11 @@ class SearchInput(BaseModel):
         ... )
     """
     query: str
-    output_type: Optional[str]
-    output_schema: Optional[str] 
-    depth: Optional[str]
+    output_type: Optional[Literal['searchResults','sourcedAnswer','structured']] = None
+    output_schema: Optional[str] = None
+    depth: Optional[Literal['standard', 'deep']] = None
     @model_validator(mode="after")
     def validate_search_data(self) -> Self:
-        if self.output_type is not None and self.output_type not in ['searchResults','sourcedAnswer','structured']:
-            raise ValueError(f"Output type must be one of {', '.join(['searchResults','sourcedAnswer','structured'])}")
-        if self.depth is not None and self.depth not in ['standard', 'deep']:
-            raise ValueError(f"Search type must be one of {', '.join(['standard', 'deep'])}")
         if self.output_type == 'structured':
             if self.output_schema is None:
                 raise ValueError("You need to define the output schema as a JSON serializable string if you set 'structured' as output_type")
@@ -92,16 +88,12 @@ class InputDatabaseData(BaseModel):
     call_id: str
     status_code: int
     query: str
-    output_type: str
-    search_type: str
+    output_type: Literal['searchResults','sourcedAnswer','structured']
+    search_type: Literal['standard', 'deep']
     duration: float
     @model_validator(mode="after")
     def validate_database_data(self) -> Self:
         self.query = self.query.replace("'","''")
-        if self.output_type not in ['searchResults','sourcedAnswer','structured']:
-            raise ValueError(f"Output type must be one of {', '.join(['searchResults','sourcedAnswer','structured'])}")
-        if self.search_type not in ['standard', 'deep']:
-            raise ValueError(f"Search type must be one of {', '.join(['standard', 'deep'])}")
         return self
     
 class SelectDatabaseData(BaseModel):
@@ -130,18 +122,14 @@ class SelectDatabaseData(BaseModel):
         ...     created_at = False,
         ... )
     """
-    created_at: Optional[bool]
-    status_code: Optional[int]
-    output_type: Optional[str]
-    query: Optional[str]
-    search_type: Optional[str]
-    limit: Optional[int]
+    created_at: Optional[bool] = None
+    status_code: Optional[Literal[200, 500]] = None
+    output_type: Optional[Literal['searchResults','sourcedAnswer','structured']] = None
+    query: Optional[str] = None
+    search_type: Optional[Literal['standard', 'deep']] = None
+    limit: Optional[int] = None
     @model_validator(mode="after")
     def validate_select_data(self) -> Self:
-        if self.output_type is not None and self.output_type not in ['searchResults','sourcedAnswer','structured']:
-            raise ValueError(f"Output type must be one of {', '.join(['searchResults','sourcedAnswer','structured'])}")
-        if self.search_type is not None and self.search_type not in ['standard', 'deep']:
-            raise ValueError(f"Search type must be one of {', '.join(['standard', 'deep'])}")
         if self.query is not None:
             self.query = self.query.replace("'", "''")
         return self

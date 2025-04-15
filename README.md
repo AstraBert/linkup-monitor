@@ -95,6 +95,21 @@ output_data = monitored_client.get_data(data=filter_data, return_mode="pandas", 
 print(output_data)
 ```
 
+- Use the **decorator** for a functional integration:
+
+```python
+from linkup import LinkupClient
+from linkup_monitor.postgres_client import PostgresClient
+from linkup_monitor.monitor import monitor, monitored_search, SearchInput
+
+linkup_client = LinkupClient(api_key="YOUR_API_KEY")
+postgres_client = PostgresClient(host="localhost", port=5432, database="your_db", user="your_user", password="your_password")
+
+@monitor(pg_client = postgres_client)
+def search(linkup_client: LinkupClient, data: SearchInput):
+    return monitored_search(linkup_client, data)
+```
+
 You can find a complete reference for the package in [REFERENCE.md](https://github.com/AstraBert/linkup-monitor/tree/main/REFERENCE.md)
 
 ### Contributing

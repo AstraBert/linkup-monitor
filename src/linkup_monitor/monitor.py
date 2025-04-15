@@ -119,8 +119,7 @@ class MonitoredLinkupClient:
         if data.output_type != "structured":
             try:
                 start = time.time()
-                response = await self.linkup_client.async_search(query = data.query, depth= 
-            data.depth, output_type = data.output_type)
+                response = await self.linkup_client.async_search(query = data.query, depth= data.depth, output_type = data.output_type)
                 end = time.time()
                 duration = end - start 
                 status_code = 200
@@ -188,3 +187,51 @@ class MonitoredLinkupClient:
             return output_data
         else:
             raise ValueError(f"return_mode {return_mode} not supported")
+
+def monitor(pg_client: PostgresClient):
+    """
+        Decorator that monitors the execution of a function, measures its duration,
+        and logs the input and output data to a PostgreSQL database.
+
+        Args:
+            pg_client (PostgresClient): A client for interacting with the PostgreSQL database.
+
+        Returns:
+            decorator: A decorator function that can be applied to other functions.
+
+        The decorated function should accept a LinkupClient and a SearchInput object as arguments.
+        It measures the execution time of the function, catches any exceptions that occur, and logs the input data, output type, search type, status code, and duration to the database.
+        """
+    def decorator(func):
+        def wrapper(linkup_client: LinkupClient, data: SearchInput):
+            try:
+                start = time.time()
+                response = func(linkup_client, data)
+                end = time.time()
+                duration = end - start 
+                status_code = 200
+            except Exception as e:
+                duration = -1
+                status_code = 500
+            result = InputDatabaseData(call_id=str(uuid.uuid4()), status_code=status_code, query = data.query, output_type= data.output_type, search_type = data.depth, duration = duration)
+            pg_client.push_data(result)
+            return response
+        return wrapper
+    return decorator
+
+def monitored_search(linkup_client: LinkupClient, data: SearchInput):
+    """Performs a monitored search using the Linkup client.
+
+        Args:
+            linkup_client (LinkupClient): The Linkup client to use for the search.
+            data (SearchInput): The search input data.
+
+        Returns:
+            The response from the Linkup client's search method.  The structure of the response depends on the output_type specified in the SearchInput.
+            If output_type is 'structured', the response will conform to the output_schema, if provided.
+        """
+    if data.output_type != "structured":
+        response = linkup_client.search(query = data.query, depth=data.depth, output_type = data.output_type)
+    else:
+        response = linkup_client.search(query = data.query, depth= data.depth, output_type = data.output_type, structured_output_schema= data.output_schema)
+    return response

@@ -246,4 +246,27 @@ This module provides the core functionality for monitoring Linkup searches. It i
                 ... )
                 >>> results = monitored_client.get_data(select_data, return_mode="json", save_to_file=False)
                 ```
+* **Functions**:
+    * `monitor(pg_client: PostgresClient)` (decorator):  Decorator that monitors the execution of a function, measures its duration, and logs the input and output data to a PostgreSQL database.
+    The decorated function should accept a LinkupClient and a SearchInput object as arguments. It measures the execution time of the function, catches any exceptions that occur, and logs the input data, output type, search type, status code, and duration to the database.
+    * `monitored_search(linkup_client: LinkupClient, data: SearchInput)`: Performs a monitored search using the Linkup client.
+        
+        * **Args**:
+            * linkup_client (LinkupClient): The Linkup client to use for the search.
+            * data (SearchInput): The search input data.
 
+        * **Returns**:
+            * The response from the Linkup client's search method.  The structure of the response depends on the output_type specified in the SearchInput. If output_type is 'structured', the response will conform to the output_schema, if provided.
+    
+    **Example usage**:
+    ```python
+    >>> from linkup import LinkupClient
+    >>> from postgres_client import PostgresClient
+    >>> from monitor import monitor, monitored_search, SearchInput
+    >>> linkup_client = LinkupClient(api_key="YOUR_API_KEY")
+    >>> postgres_client = PostgresClient(host="localhost", port=5432, database="your_db", user="your_user", password="your_password")
+    >>> @monitor(pg_client = postgres_client)
+    >>> def search(linkup_client: LinkupClient, data: SearchInput):
+    ...     return monitored_search(linkup_client, data)
+    ```
+    

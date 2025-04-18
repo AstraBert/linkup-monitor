@@ -2,7 +2,7 @@ from linkup import LinkupClient
 try:
     from postgres_client import PostgresClient
     from add_types import SearchInput, InputDatabaseData, SelectDatabaseData, Optional, json, IgnoredFieldWarning, warnings
-except ImportError:
+except ModuleNotFoundError:
     from .postgres_client import PostgresClient
     from .add_types import SearchInput, InputDatabaseData, SelectDatabaseData, Optional, json, IgnoredFieldWarning, warnings
 from typing import Literal

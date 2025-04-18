@@ -1,9 +1,36 @@
-from pgsql import Connection
 try:
     from add_types import InputDatabaseData, SelectDatabaseData, OutputDatabaseData
 except ModuleNotFoundError:
     from .add_types import InputDatabaseData, SelectDatabaseData, OutputDatabaseData
 from typing import List, Optional
+from sqlalchemy import MetaData, create_engine, text
+from sqlalchemy.orm import sessionmaker
+import warnings
+
+class ErrorOccuredWarning(Warning):
+    """An error occured but it was handled by try...except"""
+
+class _PGClient:
+    def __init__(self, connection_string: str):
+        self.engine = create_engine(connection_string)
+        self.meta = MetaData(schema="public")
+        self.Session = sessionmaker(self.engine)
+
+        with self.Session() as sess:
+            with sess.begin():
+                sess.execute(text("create schema if not exists public;"))
+    def _execute_query(self, query):
+        try:
+            with self.Session() as sess:
+                with sess.begin():
+                    res = sess.execute(text(query))
+            return res
+        except Exception as e:
+            warnings.warn(f"An error occurred: {e}", ErrorOccuredWarning)
+            return None
+    def _disconnect(self) -> None:
+        self.engine.dispose()
+        return
 
 class PostgresClient:
     """PostgreSQL client for managing linkup monitor data.
@@ -27,19 +54,19 @@ class PostgresClient:
         database (str, optional): The name of the database to connect to. Defaults to "postgres".
     """
     def __init__(self, host: str, port: int, user: str = "postgres", password: str | None = None, database: str = "postgres") -> None:
-        self.connection = Connection(address=(host, port), user=user, password=password, database=database)
-        self.connection.execute(
+        self.connection = _PGClient(f"postgresql://{user}:{password}@{host}:{port}/{database}")
+        self.connection._execute_query(
             """
-            CREATE TABLE IF NOT EXISTS linkup_monitor (
-                id SERIAL PRIMARY KEY,
-                created_at TIMESTAMP DEFAULT NOW(),
-                call_id VARCHAR(36) DEFAULT NULL,
-                status_code INT DEFAULT NULL,
-                duration FLOAT DEFAULT NULL,
-                query TEXT DEFAULT NULL,
-                output_type TEXT DEFAULT NULL,
-                search_type TEXT DEFAULT NULL
-            );
+            CREATE TABLE IF NOT EXISTS public.linkup_monitor (
+    id SERIAL PRIMARY KEY,
+    created_at TIMESTAMP DEFAULT NOW(),
+    call_id VARCHAR(36) DEFAULT NULL,
+    status_code INT DEFAULT NULL,
+    duration FLOAT DEFAULT NULL,
+    query TEXT DEFAULT NULL,
+    output_type TEXT DEFAULT NULL,
+    search_type TEXT DEFAULT NULL
+);
             """
         )
     def push_data(self, data: InputDatabaseData) -> None:
@@ -58,7 +85,7 @@ class PostgresClient:
         Returns:
             None
         """
-        self.connection.execute(f"INSERT INTO linkup_monitor (call_id, status_code, duration, query, output_type, search_type) VALUES ('{data.call_id}', {data.status_code}, {data.duration}, '{data.query}', '{data.output_type}', '{data.search_type}');") 
+        self.connection._execute_query(f"INSERT INTO public.linkup_monitor (call_id, status_code, duration, query, output_type, search_type) VALUES ('{data.call_id}', {data.status_code}, {data.duration}, '{data.query}', '{data.output_type}', '{data.search_type}');") 
     def pull_data(self, data: Optional[SelectDatabaseData] = None) -> List[OutputDatabaseData]:
         """Pull data from linkup_monitor table based on optional filter criteria.
 
@@ -86,9 +113,10 @@ class PostgresClient:
         """
         output: List[OutputDatabaseData] = []
         if data is None:
-            selected = self.connection("SELECT * FROM linkup_monitor;")
+            response = self.connection._execute_query("SELECT * FROM linkup_monitor;")
+            selected = response.fetchall()
             for el in selected:
-                output.append(OutputDatabaseData(identifier=el.id, timestamp=el.created_at, call_id=el.call_id, query=el.query, output_type=el.output_type, search_type=el.search_type, duration = el.duration, status_code=el.status_code))
+                output.append(OutputDatabaseData(identifier=el[0], timestamp=el[1].strftime("%Y/%m/%d, %H:%M:%S"), call_id=el[2], query=el[5], output_type=el[6], search_type=el[7], duration = el[4], status_code=el[3]))
         else:
             conditions = data.model_dump()
             fields = {k: v for k,v in conditions.items() if v is not None and k not in ["created_at", "limit"]}
@@ -97,24 +125,31 @@ class PostgresClient:
             if fields != {}:
                 conds = [f"{k} = {v}" if not isinstance(v, str) else f"{k} = '{v}'" for k,v in fields.items()]
                 if created_at is None and limit is None:
-                    selected = self.connection(f"SELECT * FROM linkup_monitor WHERE {' AND '.join(conds)};")
+                    response = self.connection._execute_query(f"SELECT * FROM linkup_monitor WHERE {' AND '.join(conds)};")
+                    selected = response.fetchall()
                 elif created_at is None and limit is not None:
-                    selected = self.connection(f"SELECT * FROM linkup_monitor WHERE {' AND '.join(conds)} LIMIT {limit};")
+                    response = self.connection._execute_query(f"SELECT * FROM linkup_monitor WHERE {' AND '.join(conds)} LIMIT {limit};")
+                    selected = response.fetchall()
                 elif created_at is not None and limit is None:
                     ordr = "DESC" if created_at else "ASC" 
-                    selected = self.connection(f"SELECT * FROM linkup_monitor WHERE {' AND '.join(conds)} ORDER BY created_at {ordr};")
+                    response = self.connection._execute_query(f"SELECT * FROM linkup_monitor WHERE {' AND '.join(conds)} ORDER BY created_at {ordr};")
+                    selected = response.fetchall()
                 else:      
                     ordr = "DESC" if created_at else "ASC"   
-                    selected = self.connection(f"SELECT * FROM linkup_monitor WHERE {' AND '.join(conds)} ORDER BY created_at {ordr} LIMIT {limit};")
+                    response = self.connection._execute_query(f"SELECT * FROM linkup_monitor WHERE {' AND '.join(conds)} ORDER BY created_at {ordr} LIMIT {limit};")
+                    selected = response.fetchall()
             else:
                 if created_at is None and limit is not None:
-                    selected = self.connection(f"SELECT * FROM linkup_monitor LIMIT {limit};")
+                    response = self.connection._execute_query(f"SELECT * FROM linkup_monitor LIMIT {limit};")
+                    selected = response.fetchall()
                 elif created_at is not None and limit is None:
                     ordr = "DESC" if created_at else "ASC"   
-                    selected = self.connection(f"SELECT * FROM linkup_monitor ORDER BY created_at {ordr};")
+                    response = self.connection._execute_query(f"SELECT * FROM linkup_monitor ORDER BY created_at {ordr};")
+                    selected = response.fetchall()
                 else:      
                     ordr = "DESC" if created_at else "ASC"   
-                    selected = self.connection(f"SELECT * FROM linkup_monitor ORDER BY created_at {ordr} LIMIT {limit};")               
+                    response = self.connection._execute_query(f"SELECT * FROM linkup_monitor ORDER BY created_at {ordr} LIMIT {limit};")         
+                    selected = response.fetchall()      
             for el in selected:
-                output.append(OutputDatabaseData(identifier=el.id, timestamp=el.created_at, call_id=el.call_id, query=el.query, output_type=el.output_type, search_type=el.search_type, duration = el.duration, status_code=el.status_code))
+                output.append(OutputDatabaseData(identifier=el[0], timestamp=el[1].strftime("%Y/%m/%d, %H:%M:%S"), call_id=el[2], query=el[5], output_type=el[6], search_type=el[7], duration = el[4], status_code=el[3]))
         return output

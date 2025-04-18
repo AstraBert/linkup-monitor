@@ -21,7 +21,7 @@ def test_data_push():
     expected_error = [False, False, False]
     error = []
     client = PostgresClient(host="localhost", port=5432, user="localhost", password="admin", database="postgres")
-    client.connection.execute("DELETE FROM linkup_monitor WHERE query = 'This doesn''t make sense' AND duration = 1")
+    client.connection._execute_query("DELETE FROM linkup_monitor WHERE query = 'This doesn''t make sense' AND duration = 1")
     data = [{"call_id": str(uuid.uuid4()), "status_code": 200, "query": "This doesn't make sense", "output_type": "searchResults", "search_type": "standard", "duration": 1}, {"call_id": str(uuid.uuid4()), "status_code": 200, "query": "This doesn't make sense", "output_type": "searchResults", "search_type": "standard", "duration": 1}, {"call_id": str(uuid.uuid4()), "status_code": 500, "query": "This doesn't make sense", "output_type": "searchResults", "search_type": "standard", "duration": 1}]
     for d in data:
         dt = InputDatabaseData.model_validate_json(json.dumps(d))

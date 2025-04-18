@@ -1,7 +1,7 @@
 from pgsql import Connection
 try:
     from add_types import InputDatabaseData, SelectDatabaseData, OutputDatabaseData
-except ImportError:
+except ModuleNotFoundError:
     from .add_types import InputDatabaseData, SelectDatabaseData, OutputDatabaseData
 from typing import List, Optional
 

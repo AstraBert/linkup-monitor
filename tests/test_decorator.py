@@ -15,8 +15,8 @@ def search(linkup_client: LinkupClient, data: SearchInput):
     return monitored_search(linkup_client, data)
 
 def test_monitor_search():
-    postgres_client.connection.execute("DELETE FROM linkup_monitor WHERE query = 'Who won the Nobel prize in 2021?' AND output_type = 'searchResults' AND search_type = 'standard';")
-    postgres_client.connection.execute("DELETE FROM linkup_monitor WHERE query = 'What were Microsoft revenue and operating income in USD in the fiscal year 2022?' AND output_type = 'structured' AND search_type = 'standard';")
+    postgres_client.connection._execute_query("DELETE FROM linkup_monitor WHERE query = 'Who won the Nobel prize in 2021?' AND output_type = 'searchResults' AND search_type = 'standard';")
+    postgres_client.connection._execute_query("DELETE FROM linkup_monitor WHERE query = 'What were Microsoft revenue and operating income in USD in the fiscal year 2022?' AND output_type = 'structured' AND search_type = 'standard';")
     test_inputs = [
         {
             "query": "Who won the Nobel prize in 2021?",

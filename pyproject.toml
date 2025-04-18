@@ -4,7 +4,7 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "linkup-monitor"
-version = "0.1.2"
+version = "1.0.0"
 authors = [
     { name="Clelia (Astra) Bertelli", email="astraberte9@gmail.com" },
 ]
@@ -18,7 +18,7 @@ classifiers = [
 ]
 dependencies = [
     'pydantic',
-    'pgsql',
+    'sqlalchemy',
     'pandas',
     'linkup-sdk',
 ]

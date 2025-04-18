@@ -13,9 +13,9 @@ monitored_client = MonitoredLinkupClient(linkup_client, postgres_client)
 
 @pytest.mark.asyncio
 async def test_async_search():
-    postgres_client.connection.execute("DELETE FROM linkup_monitor WHERE query = 'Who won the Nobel prize in 2021?' AND output_type = 'searchResults' AND search_type = 'standard';")
-    postgres_client.connection.execute("DELETE FROM linkup_monitor WHERE query = 'What is the difference between a compiled and an interpreted programming language?' AND output_type = 'sourcedAnswer' AND search_type = 'deep';")
-    postgres_client.connection.execute("DELETE FROM linkup_monitor WHERE query = 'What were Microsoft revenue and operating income in USD in the fiscal year 2022?' AND output_type = 'structured' AND search_type = 'standard';")
+    postgres_client.connection._execute_query("DELETE FROM linkup_monitor WHERE query = 'Who won the Nobel prize in 2021?' AND output_type = 'searchResults' AND search_type = 'standard';")
+    postgres_client.connection._execute_query("DELETE FROM linkup_monitor WHERE query = 'What is the difference between a compiled and an interpreted programming language?' AND output_type = 'sourcedAnswer' AND search_type = 'deep';")
+    postgres_client.connection._execute_query("DELETE FROM linkup_monitor WHERE query = 'What were Microsoft revenue and operating income in USD in the fiscal year 2022?' AND output_type = 'structured' AND search_type = 'standard';")
     test_inputs = [
         {
             "query": "Who won the Nobel prize in 2021?",

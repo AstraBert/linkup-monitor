@@ -18,7 +18,7 @@ def fl_in_dir(dirct, ext):
     return False
 
 def test_data_raw():
-    postgres_client.connection.execute("DELETE FROM linkup_monitor WHERE query = 'This makes sense' AND duration = 3")
+    postgres_client.connection._execute_query("DELETE FROM linkup_monitor WHERE query = 'This makes sense' AND duration = 3")
     data = [{"call_id": str(uuid.uuid4()), "status_code": 200, "query": "This makes sense", "output_type": "searchResults", "search_type": "standard", "duration": 3}, {"call_id": str(uuid.uuid4()), "status_code": 200, "query": "This makes sense", "output_type": "searchResults", "search_type": "standard", "duration": 3}, {"call_id": str(uuid.uuid4()), "status_code": 500, "query": "This makes sense", "output_type": "searchResults", "search_type": "standard", "duration": 3}]
     for d in data:
         dt = InputDatabaseData.model_validate_json(json.dumps(d))
@@ -28,7 +28,7 @@ def test_data_raw():
     assert isinstance(output_data[0], BaseModel) == True
 
 def test_data_json():
-    postgres_client.connection.execute("DELETE FROM linkup_monitor WHERE query = 'This makes sense' AND duration = 3")
+    postgres_client.connection._execute_query("DELETE FROM linkup_monitor WHERE query = 'This makes sense' AND duration = 3")
     data = [{"call_id": str(uuid.uuid4()), "status_code": 200, "query": "This makes sense", "output_type": "searchResults", "search_type": "standard", "duration": 3}, {"call_id": str(uuid.uuid4()), "status_code": 200, "query": "This makes sense", "output_type": "searchResults", "search_type": "standard", "duration": 3}, {"call_id": str(uuid.uuid4()), "status_code": 500, "query": "This makes sense", "output_type": "searchResults", "search_type": "standard", "duration": 3}]
     for d in data:
         dt = InputDatabaseData.model_validate_json(json.dumps(d))
@@ -39,7 +39,7 @@ def test_data_json():
     assert isinstance(output_data[0], dict) == True
 
 def test_data_pd():
-    postgres_client.connection.execute("DELETE FROM linkup_monitor WHERE query = 'This makes sense' AND duration = 3")
+    postgres_client.connection._execute_query("DELETE FROM linkup_monitor WHERE query = 'This makes sense' AND duration = 3")
     data = [{"call_id": str(uuid.uuid4()), "status_code": 200, "query": "This makes sense", "output_type": "searchResults", "search_type": "standard", "duration": 3}, {"call_id": str(uuid.uuid4()), "status_code": 200, "query": "This makes sense", "output_type": "searchResults", "search_type": "standard", "duration": 3}, {"call_id": str(uuid.uuid4()), "status_code": 500, "query": "This makes sense", "output_type": "searchResults", "search_type": "standard", "duration": 3}]
     for d in data:
         dt = InputDatabaseData.model_validate_json(json.dumps(d))

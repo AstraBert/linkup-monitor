@@ -19,6 +19,7 @@ classifiers = [
 dependencies = [
     'pydantic',
     'sqlalchemy',
+    'psycopg2-binary',
     'pandas',
     'linkup-sdk',
 ]

@@ -1,6 +1,10 @@
 from linkup import LinkupClient
-from postgres_client import PostgresClient
-from add_types import SearchInput, InputDatabaseData, SelectDatabaseData, Optional, json, IgnoredFieldWarning, warnings
+try:
+    from postgres_client import PostgresClient
+    from add_types import SearchInput, InputDatabaseData, SelectDatabaseData, Optional, json, IgnoredFieldWarning, warnings
+except ImportError:
+    from .postgres_client import PostgresClient
+    from .add_types import SearchInput, InputDatabaseData, SelectDatabaseData, Optional, json, IgnoredFieldWarning, warnings
 from typing import Literal
 import time
 import uuid

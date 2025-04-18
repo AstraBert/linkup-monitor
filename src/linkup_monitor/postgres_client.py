@@ -1,5 +1,8 @@
 from pgsql import Connection
-from add_types import InputDatabaseData, SelectDatabaseData, OutputDatabaseData
+try:
+    from add_types import InputDatabaseData, SelectDatabaseData, OutputDatabaseData
+except ImportError:
+    from .add_types import InputDatabaseData, SelectDatabaseData, OutputDatabaseData
 from typing import List, Optional
 
 class PostgresClient:
